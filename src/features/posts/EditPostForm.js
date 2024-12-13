@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { postUpdated, selectPostById, fetchPosts } from "./postsSlice";
+import { useNavigate } from "react-router-dom";
+import { postUpdated, selectPostById } from "./postsSlice";
 
 export const EditPostForm = ({ match }) => {
   const { postId } = match.params;
@@ -11,7 +11,7 @@ export const EditPostForm = ({ match }) => {
   const [content, setContent] = useState(post.content);
 
   const dispatch = useDispatch();
-  const history = useHistory();
+  const history = useNavigate();
 
   const onTitleChanged = (e) => setTitle(e.target.value);
   const onContentChanged = (e) => setContent(e.target.value);

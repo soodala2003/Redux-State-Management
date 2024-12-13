@@ -1,12 +1,13 @@
-import { rest, setupWorker } from 'msw';
-import { factory, oneOf, manyOf, primaryKey } from '@mswjs/data';
-import { nanoid } from '@reduxjs/toolkit';
-import faker from 'faker';
-import seedrandom from 'seedrandom';
-import { Server as MockSocketServer } from 'mock-socket';
-import { setRandom } from 'txtgen';
+import { setupWorker } from "msw/browser";
+import { http } from "msw";
+import { factory, oneOf, manyOf, primaryKey } from "@mswjs/data";
+import { nanoid } from "@reduxjs/toolkit";
+import faker from "faker";
+import seedrandom from "seedrandom";
+import { Server as MockSocketServer } from "mock-socket";
+import { setRandom } from "txtgen";
 
-import { parseISO } from 'date-fns';
+import { parseISO } from "date-fns";
 
 const NUM_USERS = 3;
 const POSTS_PER_USER = 3;
@@ -130,11 +131,11 @@ const serializePost = (post) => ({
 /* MSW REST API Handlers */
 
 export const handlers = [
-  rest.get('/fakeApi/posts', function (req, res, ctx) {
+  http.get('/fakeApi/posts', function (req, res, ctx) {
     const posts = db.post.getAll().map(serializePost);
     return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(posts));
   }),
-  rest.post('/fakeApi/posts', function (req, res, ctx) {
+  http.post('/fakeApi/posts', function (req, res, ctx) {
     const data = req.body;
 
     if (data.content === 'error') {
@@ -154,13 +155,13 @@ export const handlers = [
     const post = db.post.create(data);
     return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(serializePost(post)));
   }),
-  rest.get('/fakeApi/posts/:postId', function (req, res, ctx) {
+  http.get('/fakeApi/posts/:postId', function (req, res, ctx) {
     const post = db.post.findFirst({
       where: { id: { equals: req.params.postId } },
     });
     return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(serializePost(post)));
   }),
-  rest.patch('/fakeApi/posts/:postId', (req, res, ctx) => {
+  http.patch('/fakeApi/posts/:postId', (req, res, ctx) => {
     const { id, ...data } = req.body;
     const updatedPost = db.post.update({
       where: { id: { equals: req.params.postId } },
@@ -172,7 +173,7 @@ export const handlers = [
     );
   }),
 
-  rest.get('/fakeApi/posts/:postId/comments', (req, res, ctx) => {
+  http.get('/fakeApi/posts/:postId/comments', (req, res, ctx) => {
     const post = db.post.findFirst({
       where: { id: { equals: req.params.postId } },
     });
@@ -182,7 +183,7 @@ export const handlers = [
     );
   }),
 
-  rest.post('/fakeApi/posts/:postId/reactions', (req, res, ctx) => {
+  http.post('/fakeApi/posts/:postId/reactions', (req, res, ctx) => {
     const postId = req.params.postId;
     const reaction = req.body.reaction;
     const post = db.post.findFirst({
@@ -204,7 +205,7 @@ export const handlers = [
       ctx.json(serializePost(updatedPost))
     );
   }),
-  rest.get('/fakeApi/notifications', (req, res, ctx) => {
+  http.get('/fakeApi/notifications', (req, res, ctx) => {
     const numNotifications = getRandomInt(1, 5);
 
     let notifications = generateRandomNotifications(
@@ -215,7 +216,7 @@ export const handlers = [
 
     return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(notifications));
   }),
-  rest.get('/fakeApi/users', (req, res, ctx) => {
+  http.get('/fakeApi/users', (req, res, ctx) => {
     return res(ctx.delay(ARTIFICIAL_DELAY_MS), ctx.json(db.user.getAll()));
   }),
 ]
